@@ -18,10 +18,12 @@
 - [Architecture](#-architecture)
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
+- [Environment Variables](#-environment-variables)
 - [API Endpoints](#-api-endpoints)
 - [Role-Based Access Control](#-role-based-access-control)
+- [Application Workflow](#-application-workflow)
 - [Application Modules](#-application-modules)
-- [Screenshots](#-screenshots)
+- [Payment Integration](#-payment-integration)
 - [Future Roadmap](#-future-roadmap)
 - [License](#-license)
 
@@ -45,6 +47,7 @@ The application features a **React 19** frontend with **Tailwind CSS** styling a
 | 💹 **Price Volatility Analysis** | Track energy market price fluctuations, calculate variance, and identify high-risk pricing periods |
 | 🔎 **Billing Anomaly Detection** | Flag irregular billing amounts or impossible consumption jumps to prevent fraud or hardware errors |
 | 😊 **Customer Satisfaction** | Collect user feedback and perform simulated AI-based sentiment analysis with NPS scoring |
+| 💳 **Razorpay Payments** | Integrated Razorpay Checkout for secure payment processing during billing |
 | 💼 **Billing Staff Portal** | Dedicated dashboard for billing management and customer account resolution |
 | 👤 **User Portal** | Personal usage metrics, consumption tracking, and satisfaction feedback submission |
 | 🌗 **Theme Support** | Dark/Light mode toggle via React Context API |
@@ -71,6 +74,7 @@ The application features a **React 19** frontend with **Tailwind CSS** styling a
 | **Express.js 4** | REST API framework |
 | **JSON Web Tokens (JWT)** | Authentication & authorization |
 | **bcrypt.js** | Password hashing |
+| **Razorpay SDK** | Payment order creation & verification |
 | **CORS** | Cross-origin resource sharing |
 | **dotenv** | Environment variable management |
 
@@ -99,7 +103,7 @@ The application features a **React 19** frontend with **Tailwind CSS** styling a
 │  │  └──────────┘ └──────────┘ │  └─────────────┘  │  │   │
 │  │                            └──────────────────────┘  │   │
 │  └───────────────────────┬──────────────────────────┘   │
-│                          │ HTTP (Axios)                   │
+│                          │ HTTP (fetch)                   │
 └──────────────────────────┼──────────────────────────────┘
                            │
                            ▼
@@ -114,7 +118,8 @@ The application features a **React 19** frontend with **Tailwind CSS** styling a
 │  │ JSON Parse │  │  /api/staff-auth    (Staff Auth)    │  │
 │  │ Logger     │  │  /api/dashboard     (Admin Metrics) │  │
 │  │            │  │  /api/billing       (Billing Ops)   │  │
-│  └────────────┘  │  /api/demand-forecast               │  │
+│  └────────────┘  │  /api/payment       (Razorpay)      │  │
+│                  │  /api/demand-forecast               │  │
 │                  │  /api/price-volatility               │  │
 │                  │  /api/billing-anomaly                │  │
 │                  │  /api/customer-satisfaction           │  │
@@ -134,7 +139,9 @@ The application features a **React 19** frontend with **Tailwind CSS** styling a
 ```
 InsightBI/
 ├── backend/                          # Node.js/Express API Server
-│   ├── config.js                     # Server configuration (PORT, JWT, CORS)
+│   ├── .env                          # Environment variables (git-ignored)
+│   ├── .gitignore                    # Git ignore rules
+│   ├── config.js                     # Loads env vars via dotenv
 │   ├── server.js                     # Express app entry point
 │   ├── package.json                  # Backend dependencies
 │   ├── data/
@@ -147,6 +154,7 @@ InsightBI/
 │       ├── staffAuth.js              # Billing staff authentication routes
 │       ├── dashboard.js              # Dashboard data endpoints
 │       ├── billing.js                # Billing management endpoints
+│       ├── payment.js                # Razorpay payment endpoints
 │       ├── billingAnomaly.js         # Anomaly detection endpoints
 │       ├── demandForecast.js         # Demand forecasting endpoints
 │       ├── priceVolatility.js        # Price volatility endpoints
@@ -182,18 +190,15 @@ InsightBI/
 │       │   ├── UserRegister.js       # Consumer registration
 │       │   ├── Dashboard.js          # Admin dashboard
 │       │   ├── UserDashboard.js      # Consumer dashboard
-│       │   ├── BillingStaffDashboard.js # Staff dashboard
+│       │   ├── BillingStaffDashboard.js # Staff dashboard + Razorpay
 │       │   ├── DemandForecast.js     # Demand forecasting module
 │       │   ├── PriceVolatility.js    # Price volatility module
 │       │   ├── BillingAnomaly.js     # Billing anomaly module
 │       │   ├── CustomerSatisfaction.js # Satisfaction module
 │       │   └── Profile.js           # User profile page
 │       └── services/
-│           └── api.js                # Axios HTTP client & API calls
+│           └── api.js                # HTTP client & API calls
 │
-├── InsightBI_Project_Details.md      # Detailed project documentation
-├── InsightBI_Presentation.md         # Presentation content
-├── InsightBI_Presentation.pptx       # PowerPoint presentation
 └── README.md                         # This file
 ```
 
@@ -211,7 +216,7 @@ InsightBI/
 **1. Clone the repository**
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/RH-NIKHIL/InsightBI.git
 cd InsightBI
 ```
 
@@ -229,7 +234,11 @@ cd ../insightbi-frontend
 npm install
 ```
 
-**4. Start the backend server**
+**4. Configure environment variables**
+
+Create a `.env` file in the `backend/` directory (see [Environment Variables](#-environment-variables)).
+
+**5. Start the backend server**
 
 ```bash
 cd ../backend
@@ -238,7 +247,7 @@ npm start
 
 The API server will start on **http://localhost:5000**.
 
-**5. Start the frontend development server** (in a new terminal)
+**6. Start the frontend development server** (in a new terminal)
 
 ```bash
 cd ../insightbi-frontend
@@ -247,15 +256,22 @@ npm start
 
 The React app will open at **http://localhost:3000**.
 
-### Environment Variables (Optional)
+---
 
-Create a `.env` file in the `backend/` directory:
+## 🔐 Environment Variables
+
+Create a `.env` file in the `backend/` directory with the following variables:
 
 ```env
 PORT=5000
-JWT_SECRET=your_custom_secret_key
+JWT_SECRET=your_jwt_secret_key
+JWT_EXPIRES_IN=7d
 CORS_ORIGIN=http://localhost:3000
+RAZORPAY_KEY_ID=rzp_test_XXXXXXXXXXXX
+RAZORPAY_SECRET=your_razorpay_secret
 ```
+
+> ⚠️ **Never commit your `.env` file to git.** The `.gitignore` is already configured to exclude it.
 
 ---
 
@@ -284,6 +300,13 @@ CORS_ORIGIN=http://localhost:3000
 | `POST` | `/api/billing-anomaly/scan` | Scan for billing anomalies |
 | `GET` | `/api/customer-satisfaction` | Fetch satisfaction metrics |
 | `POST` | `/api/customer-satisfaction` | Submit feedback |
+
+### Payment (Razorpay)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/payment/create-order` | Create a Razorpay payment order |
+| `POST` | `/api/payment/verify` | Verify payment signature |
 
 ### System
 
@@ -316,33 +339,62 @@ Each role has:
 
 ---
 
-## 🧩 Application Modules
+## 🔄 Application Workflow
 
-### 1. Demand Forecasting (Admin)
-Predicts future energy demand based on historical usage data. Administrators can view historical consumption charts and trigger forecast generation via `POST /api/demand-forecast/generate`. The backend simulates ML-based predictions and returns projected data points rendered as interactive line graphs.
+The application follows a structured, modular workflow:
 
-### 2. Price Volatility Analysis (Admin)
-Tracks energy market price fluctuations to optimize purchasing and selling strategies. The module calculates variance, applies a volatility index score, and identifies high-risk pricing periods through `POST /api/price-volatility/analyze`.
+### Step 1: Entry & Authentication
+- Users land on the **Home** page and navigate to the Login portal (`/login`).
+- The user selects their role (Admin, Staff, or User) via a unified login interface.
+- Upon successful authentication, the backend issues a distinct **JWT** based on the role.
 
-### 3. Billing Anomaly Detection (Admin & Staff)
-Flags irregular billing amounts or impossible consumption jumps. Transactions outside the standard deviation threshold are marked as **"High Risk"** or **"Anomaly Detected"**. Staff members can review flagged accounts for investigation.
+### Step 2: Routing & Protection
+- React Router evaluates the token against Protected Route wrappers (`ProtectedRoute`, `StaffProtectedRoute`, `UserProtectedRoute`).
+- Users are redirected to their respective dashboards. Unauthorized access attempts redirect back to login.
 
-### 4. Customer Satisfaction (Consumer)
-Enables consumers to submit feedback that is processed through simulated AI sentiment analysis. The system generates a **Net Promoter Score (NPS)** and categorizes feedback into segment insights.
+### Step 3: Module Execution & Projections
+Each role accesses their permitted modules (detailed below), where they can view data visualizations and trigger analytics operations via the REST API.
 
 ---
 
-## 📸 Screenshots
+## 🧩 Application Modules
 
-> _Add screenshots of your application here to showcase the UI._
->
-> Examples:
-> - Home Page / Landing Page
-> - Admin Dashboard
-> - Demand Forecasting Module
-> - Price Volatility Analysis
-> - Billing Anomaly Detection
-> - Customer Satisfaction Portal
+### 1. Demand Forecasting (Admin)
+Predicts future energy demand based on historical usage data.
+- Frontend requests `/api/demand-forecast` to render historical charts.
+- Clicking **"Run Forecast"** hits `POST /api/demand-forecast/generate`.
+- The backend simulates an ML model, returning projected data points rendered as interactive line graphs in real-time.
+
+### 2. Price Volatility Analysis (Admin)
+Tracks energy market price fluctuations to optimize purchasing and selling strategies.
+- Frontend requests `/api/price-volatility` to visualize real-time market data.
+- Clicking **"Run Analysis"** hits `POST /api/price-volatility/analyze`.
+- The system calculates variance, applies a volatility index score, and identifies high-risk pricing periods.
+
+### 3. Billing Anomaly Detection (Admin & Staff)
+Flags irregular billing amounts or impossible consumption jumps to prevent fraud or hardware errors.
+- Frontend fetches `/api/billing-anomaly` to list recent transactions.
+- The **"Scan"** action hits `POST /api/billing-anomaly/scan`.
+- Transactions outside the standard deviation threshold are marked as **"High Risk"** or **"Anomaly Detected"**. Staff can review flagged accounts.
+
+### 4. Customer Satisfaction (Consumer)
+Enables consumers to submit feedback processed through simulated AI sentiment analysis.
+- User navigates to Customer Satisfaction on their dashboard and submits feedback.
+- The system generates a **Net Promoter Score (NPS)** and categorizes feedback into segment insights.
+
+---
+
+## 💳 Payment Integration
+
+InsightBI uses **Razorpay** for secure payment processing in the billing flow.
+
+**Flow:**
+1. Staff clicks **"Pay & Generate Bill"** → backend creates a Razorpay order.
+2. Razorpay Checkout popup opens with pre-filled customer details.
+3. After successful payment, the signature is verified server-side (HMAC SHA256).
+4. Only after verification does the bill get created.
+
+**Test Card:** `4111 1111 1111 1111` | Any future expiry | Any CVV | OTP: `1234`
 
 ---
 

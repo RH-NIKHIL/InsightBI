@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import {
-  DollarSign, Upload, Play, Download, RefreshCw, TrendingUp, TrendingDown, AlertTriangle, Info, Activity, BarChart2
+  DollarSign, Upload, Play, Download, RefreshCw, TrendingUp, TrendingDown, AlertTriangle, Info, Activity, BarChart2, LayoutDashboard, LogOut
 } from 'lucide-react';
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -16,6 +18,8 @@ const TEXT_SEC = '#a09888';
 const tooltipStyle = { backgroundColor: '#111111', border: '1px solid rgba(201,168,76,0.2)', borderRadius: '8px', color: '#f0ece4' };
 
 const PriceVolatility = () => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [selectedProduct, setSelectedProduct] = useState('all');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [apiData, setApiData] = useState(null);
@@ -77,20 +81,56 @@ const PriceVolatility = () => {
   };
 
   return (
-    <div className="min-h-screen pt-24 pb-12" style={{ background: 'var(--bg-primary)' }}>
-      <div className="max-w-[1400px] mx-auto px-5 md:px-10 lg:px-[60px]">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-xl flex items-center justify-center" style={{ background: GOLD }}>
-              <DollarSign className="w-7 h-7" style={{ color: '#060606' }} />
-            </div>
-            <div>
-              <h1 className="text-3xl" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-primary)', fontWeight: 400 }}>Price Volatility</h1>
-              <p className="text-sm" style={{ color: TEXT_SEC }}>Monitor and predict price fluctuations</p>
-            </div>
+    <div className="min-h-screen" style={{ background: 'var(--bg-primary)' }}>
+      {/* Header */}
+      <header
+        className="sticky top-0 z-50 px-6 py-4 flex items-center justify-between"
+        style={{
+          background: 'rgba(6, 6, 6, 0.85)',
+          backdropFilter: 'blur(12px)',
+          borderBottom: '1px solid var(--border-subtle)',
+        }}
+      >
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="flex items-center gap-2 text-sm hover:opacity-70 transition-opacity"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            <LayoutDashboard className="w-4 h-4" />
+            <span>Back to Dashboard</span>
+          </button>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="text-right">
+            <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{user?.name}</p>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Administrator</p>
           </div>
-          <div className="flex items-center gap-3 mt-4 md:mt-0">
+          <button
+            onClick={logout}
+            className="p-2 rounded-lg transition-all hover:bg-[var(--surface)]"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            <LogOut className="w-5 h-5" />
+          </button>
+        </div>
+      </header>
+
+      <div className="pt-8 pb-12">
+        <div className="max-w-[1400px] mx-auto px-5 md:px-10 lg:px-[60px]">
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-xl flex items-center justify-center" style={{ background: GOLD }}>
+                <DollarSign className="w-7 h-7" style={{ color: '#060606' }} />
+              </div>
+              <div>
+                <h1 className="text-3xl" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-primary)', fontWeight: 400 }}>Price Volatility</h1>
+                <p className="text-sm" style={{ color: TEXT_SEC }}>Monitor and predict price fluctuations</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 mt-4 md:mt-0">
             <button className="btn-secondary flex items-center gap-2"><Upload className="w-4 h-4" /><span>Upload Prices</span></button>
             <button onClick={handleAnalyze} className="btn-primary flex items-center gap-2" disabled={isAnalyzing}>
               {isAnalyzing ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
@@ -232,6 +272,7 @@ const PriceVolatility = () => {
             </table>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

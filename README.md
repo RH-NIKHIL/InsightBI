@@ -163,7 +163,7 @@ InsightBI/
 │       ├── priceVolatility.js        # Price volatility endpoints
 │       └── customerSatisfaction.js   # Customer satisfaction endpoints
 │
-├── insightbi-frontend/               # React 19 SPA Frontend
+├── frontend/                          # React 19 SPA Frontend
 │   ├── package.json                  # Frontend dependencies
 │   ├── tailwind.config.js            # Tailwind CSS configuration
 │   ├── postcss.config.js             # PostCSS configuration
@@ -233,7 +233,7 @@ npm install
 **3. Install frontend dependencies**
 
 ```bash
-cd ../insightbi-frontend
+cd ../frontend
 npm install
 ```
 
@@ -253,7 +253,7 @@ The API server will start on **http://localhost:5000**.
 **6. Start the frontend development server** (in a new terminal)
 
 ```bash
-cd ../insightbi-frontend
+cd ../frontend
 npm start
 ```
 

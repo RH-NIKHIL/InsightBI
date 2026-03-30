@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import {
   TrendingUp, DollarSign, FileWarning, ArrowUpRight,
-  Activity, AlertTriangle, CheckCircle, Clock, ArrowUp, ArrowDown, BarChart3, Users, Loader
+  Activity, AlertTriangle, CheckCircle, Clock, ArrowUp, ArrowDown, BarChart3, Users, Loader, LayoutDashboard, LogOut
 } from 'lucide-react';
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
@@ -17,6 +18,8 @@ const TEXT_SEC = '#a09888';
 const TEXT_MUTED = '#605848';
 
 const Dashboard = () => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [apiData, setApiData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -97,8 +100,44 @@ const Dashboard = () => {
   const recentAlerts = apiData?.recentAlerts || [];
 
   return (
-    <div className="min-h-screen pt-24 pb-12" style={{ background: 'var(--bg-primary)' }}>
-      <div className="max-w-[1400px] mx-auto px-5 md:px-10 lg:px-[60px]">
+    <div className="min-h-screen" style={{ background: 'var(--bg-primary)' }}>
+      {/* Header */}
+      <header
+        className="sticky top-0 z-50 px-6 py-4 flex items-center justify-between"
+        style={{
+          background: 'rgba(6, 6, 6, 0.85)',
+          backdropFilter: 'blur(12px)',
+          borderBottom: '1px solid var(--border-subtle)',
+        }}
+      >
+        <div className="flex items-center gap-4">
+          <button
+             onClick={() => navigate('/dashboard')}
+            className="flex items-center gap-2 text-sm hover:opacity-70 transition-opacity"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            <LayoutDashboard className="w-4 h-4" />
+            <span>Dashboard Home</span>
+          </button>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="text-right">
+            <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{user?.name}</p>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Administrator</p>
+          </div>
+          <button
+            onClick={logout}
+            className="p-2 rounded-lg transition-all hover:bg-[var(--surface)]"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            <LogOut className="w-5 h-5" />
+          </button>
+        </div>
+      </header>
+
+      <div className="pt-8 pb-12">
+        <div className="max-w-[1400px] mx-auto px-5 md:px-10 lg:px-[60px]">
 
         {/* Header */}
         <div className="mb-10 flex items-start justify-between flex-wrap gap-4">
@@ -255,6 +294,7 @@ const Dashboard = () => {
           </div>
         </div>
 
+      </div>
       </div>
     </div>
   );

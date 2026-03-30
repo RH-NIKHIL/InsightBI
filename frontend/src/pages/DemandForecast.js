@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import {
-  TrendingUp, Upload, Play, Download, RefreshCw, Calendar, Filter, ArrowUp, ArrowDown, Info, Settings
+  TrendingUp, Upload, Play, Download, RefreshCw, Calendar, Filter, ArrowUp, ArrowDown, Info, Settings, LayoutDashboard, LogOut
 } from 'lucide-react';
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ComposedChart
@@ -16,6 +18,8 @@ const TEXT_SEC = '#a09888';
 const tooltipStyle = { backgroundColor: '#111111', border: '1px solid rgba(201,168,76,0.2)', borderRadius: '8px', color: '#f0ece4' };
 
 const DemandForecast = () => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState('6months');
   const [isForecasting, setIsForecasting] = useState(false);
   const [apiData, setApiData] = useState(null);
@@ -67,9 +71,45 @@ const DemandForecast = () => {
   };
 
   return (
-    <div className="min-h-screen pt-24 pb-12" style={{ background: 'var(--bg-primary)' }}>
-      <div className="max-w-[1400px] mx-auto px-5 md:px-10 lg:px-[60px]">
-        {/* Header */}
+    <div className="min-h-screen" style={{ background: 'var(--bg-primary)' }}>
+      {/* Header */}
+      <header
+        className="sticky top-0 z-50 px-6 py-4 flex items-center justify-between"
+        style={{
+          background: 'rgba(6, 6, 6, 0.85)',
+          backdropFilter: 'blur(12px)',
+          borderBottom: '1px solid var(--border-subtle)',
+        }}
+      >
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="flex items-center gap-2 text-sm hover:opacity-70 transition-opacity"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            <LayoutDashboard className="w-4 h-4" />
+            <span>Back to Dashboard</span>
+          </button>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="text-right">
+            <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{user?.name}</p>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Administrator</p>
+          </div>
+          <button
+            onClick={logout}
+            className="p-2 rounded-lg transition-all hover:bg-[var(--surface)]"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            <LogOut className="w-5 h-5" />
+          </button>
+        </div>
+      </header>
+
+      <div className="pt-8 pb-12">
+        <div className="max-w-[1400px] mx-auto px-5 md:px-10 lg:px-[60px]">
+          {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-xl flex items-center justify-center" style={{ background: GOLD }}>
@@ -229,6 +269,7 @@ const DemandForecast = () => {
             </table>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

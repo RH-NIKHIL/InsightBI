@@ -171,7 +171,7 @@ const Home = () => {
             }}
           >
             InsightBI integrates four intelligent modules to enhance strategic and operational 
-            efficiency through predictive analytics and machine learning.
+            efficiency through predictive analytics and AI.
           </p>
 
           <div ref={addRevealRef} className="reveal-up flex gap-5 justify-center flex-wrap">

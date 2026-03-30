@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   TrendingUp, DollarSign, FileWarning, ArrowUpRight,
-  Activity, AlertTriangle, CheckCircle, Clock, ArrowUp, ArrowDown, BarChart3, Users
+  Activity, AlertTriangle, CheckCircle, Clock, ArrowUp, ArrowDown, BarChart3, Users, Loader
 } from 'lucide-react';
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
@@ -18,53 +18,30 @@ const TEXT_MUTED = '#605848';
 
 const Dashboard = () => {
   const [apiData, setApiData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    dashboardAPI.getData().then(data => setApiData(data)).catch(() => {});
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const data = await dashboardAPI.getData();
+        setApiData(data);
+      } catch (err) {
+        setError('Failed to load dashboard data. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
-  const demandData = apiData?.demandData || [
-    { name: 'Jan', value: 4000, predicted: 4200 },
-    { name: 'Feb', value: 3000, predicted: 3100 },
-    { name: 'Mar', value: 5000, predicted: 4800 },
-    { name: 'Apr', value: 4500, predicted: 4700 },
-    { name: 'May', value: 6000, predicted: 5800 },
-    { name: 'Jun', value: 5500, predicted: 5600 },
-  ];
-
-
-  const priceData = apiData?.priceData || [
-    { name: 'Week 1', price: 100, volatility: 5 },
-    { name: 'Week 2', price: 105, volatility: 8 },
-    { name: 'Week 3', price: 98, volatility: 12 },
-    { name: 'Week 4', price: 110, volatility: 6 },
-    { name: 'Week 5', price: 108, volatility: 4 },
-    { name: 'Week 6', price: 115, volatility: 7 },
-  ];
-
-  const billingData = apiData?.billingData || [
-    { name: 'Normal', value: 950 },
-    { name: 'Anomaly', value: 50 },
-  ];
-
-  const defaultModules = [
-    { icon: TrendingUp, title: 'Demand Forecast', value: '12,450', change: '+15%', trend: 'up', path: '/demand-forecast', description: 'Predicted units next month' },
-    { icon: DollarSign, title: 'Price Volatility', value: '6.2%', change: '-1.8%', trend: 'down', path: '/price-volatility', description: 'Current volatility index' },
-    { icon: FileWarning, title: 'Billing Anomaly', value: '23', change: '+5', trend: 'up', path: '/billing-anomaly', description: 'Anomalies detected today' },
-  ];
-
-  const icons = [TrendingUp, DollarSign, FileWarning];
-  const paths = ['/demand-forecast', '/price-volatility', '/billing-anomaly'];
-  const modules = apiData?.modules
-    ? apiData.modules.filter(m => m.title !== 'Customer Satisfaction').map((m, i) => ({ ...m, icon: icons[i], path: paths[i] }))
-    : defaultModules;
-
-  const recentAlerts = apiData?.recentAlerts || [
-    { type: 'warning', message: 'High price volatility detected in Category A', time: '2 min ago' },
-    { type: 'success', message: 'Demand forecast updated successfully', time: '15 min ago' },
-    { type: 'error', message: 'Billing anomaly flagged for review', time: '1 hour ago' },
-    { type: 'info', message: 'Customer satisfaction model retrained', time: '3 hours ago' },
-  ];
+  const tooltipStyle = {
+    backgroundColor: '#111111',
+    border: '1px solid rgba(201, 168, 76, 0.2)',
+    borderRadius: '8px',
+    color: '#f0ece4',
+  };
 
   const getAlertIcon = (type) => {
     switch (type) {
@@ -75,16 +52,54 @@ const Dashboard = () => {
     }
   };
 
-  const tooltipStyle = {
-    backgroundColor: '#111111',
-    border: '1px solid rgba(201, 168, 76, 0.2)',
-    borderRadius: '8px',
-    color: '#f0ece4',
-  };
+  const icons = [TrendingUp, DollarSign, FileWarning];
+  const paths = ['/demand-forecast', '/price-volatility', '/billing-anomaly'];
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-primary)' }}>
+        <div className="text-center">
+          <Loader className="w-10 h-10 animate-spin mx-auto mb-4" style={{ color: 'var(--accent)' }} />
+          <p style={{ color: 'var(--text-secondary)' }}>Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-primary)' }}>
+        <div className="text-center">
+          <AlertTriangle className="w-10 h-10 mx-auto mb-4" style={{ color: '#ef4444' }} />
+          <p style={{ color: '#fca5a5' }}>{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="btn-primary mt-4"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const modules = apiData?.modules
+    ? apiData.modules
+        .filter(m => m.title !== 'Customer Satisfaction')
+        .map((m, i) => ({ ...m, icon: icons[i], path: paths[i] }))
+    : [];
+
+  const demandData = apiData?.demandData || [];
+  const priceData  = apiData?.priceData  || [];
+  const billingData = apiData?.billingData || [];
+  const recentAlerts = apiData?.recentAlerts || [];
 
   return (
     <div className="min-h-screen pt-24 pb-12" style={{ background: 'var(--bg-primary)' }}>
       <div className="max-w-[1400px] mx-auto px-5 md:px-10 lg:px-[60px]">
+
         {/* Header */}
         <div className="mb-10 flex items-start justify-between flex-wrap gap-4">
           <div>
@@ -94,10 +109,7 @@ const Dashboard = () => {
               Overview of all AI-powered business intelligence modules
             </p>
           </div>
-          <Link
-            to="/staff-management"
-            className="btn-outline flex items-center gap-2 text-sm"
-          >
+          <Link to="/staff-management" className="btn-outline flex items-center gap-2 text-sm">
             <Users className="w-4 h-4" />
             <span>Manage Staff</span>
           </Link>
@@ -135,6 +147,7 @@ const Dashboard = () => {
 
         {/* Charts Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 md:gap-6 mb-10">
+
           {/* Demand Forecast Chart */}
           <div className="card p-6">
             <div className="flex items-center justify-between mb-6">
@@ -144,24 +157,27 @@ const Dashboard = () => {
               </div>
               <Link to="/demand-forecast" className="text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>View →</Link>
             </div>
-            <ResponsiveContainer width="100%" height={250}>
-              <AreaChart data={demandData}>
-                <defs>
-                  <linearGradient id="colorValueGold" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={GOLD} stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor={GOLD} stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(201,168,76,0.1)" />
-                <XAxis dataKey="name" stroke={TEXT_MUTED} fontSize={12} />
-                <YAxis stroke={TEXT_MUTED} fontSize={12} />
-                <Tooltip contentStyle={tooltipStyle} />
-                <Area type="monotone" dataKey="value" stroke={GOLD} fillOpacity={1} fill="url(#colorValueGold)" strokeWidth={2} />
-                <Line type="monotone" dataKey="predicted" stroke={TEXT_SEC} strokeDasharray="5 5" strokeWidth={2} />
-              </AreaChart>
-            </ResponsiveContainer>
+            {demandData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <AreaChart data={demandData}>
+                  <defs>
+                    <linearGradient id="colorValueGold" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={GOLD} stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor={GOLD} stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(201,168,76,0.1)" />
+                  <XAxis dataKey="name" stroke={TEXT_MUTED} fontSize={12} />
+                  <YAxis stroke={TEXT_MUTED} fontSize={12} />
+                  <Tooltip contentStyle={tooltipStyle} />
+                  <Area type="monotone" dataKey="value" stroke={GOLD} fillOpacity={1} fill="url(#colorValueGold)" strokeWidth={2} />
+                  <Line type="monotone" dataKey="predicted" stroke={TEXT_SEC} strokeDasharray="5 5" strokeWidth={2} />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[250px] flex items-center justify-center" style={{ color: 'var(--text-muted)' }}>No data available</div>
+            )}
           </div>
-
 
           {/* Price Volatility Chart */}
           <div className="card p-6">
@@ -172,19 +188,23 @@ const Dashboard = () => {
               </div>
               <Link to="/price-volatility" className="text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>View →</Link>
             </div>
-            <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={priceData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(201,168,76,0.1)" />
-                <XAxis dataKey="name" stroke={TEXT_MUTED} fontSize={12} />
-                <YAxis stroke={TEXT_MUTED} fontSize={12} />
-                <Tooltip contentStyle={tooltipStyle} />
-                <Line type="monotone" dataKey="price" stroke={GOLD} strokeWidth={2} dot={{ fill: GOLD }} />
-                <Line type="monotone" dataKey="volatility" stroke={TEXT_SEC} strokeWidth={2} dot={{ fill: TEXT_SEC }} />
-              </LineChart>
-            </ResponsiveContainer>
+            {priceData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <LineChart data={priceData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(201,168,76,0.1)" />
+                  <XAxis dataKey="name" stroke={TEXT_MUTED} fontSize={12} />
+                  <YAxis stroke={TEXT_MUTED} fontSize={12} />
+                  <Tooltip contentStyle={tooltipStyle} />
+                  <Line type="monotone" dataKey="price" stroke={GOLD} strokeWidth={2} dot={{ fill: GOLD }} />
+                  <Line type="monotone" dataKey="volatility" stroke={TEXT_SEC} strokeWidth={2} dot={{ fill: TEXT_SEC }} />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[250px] flex items-center justify-center" style={{ color: 'var(--text-muted)' }}>No data available</div>
+            )}
           </div>
 
-          {/* Billing Chart */}
+          {/* Billing Status Chart */}
           <div className="card p-6">
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -193,15 +213,19 @@ const Dashboard = () => {
               </div>
               <Link to="/billing-anomaly" className="text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>View →</Link>
             </div>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={billingData} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(201,168,76,0.1)" />
-                <XAxis type="number" stroke={TEXT_MUTED} fontSize={12} />
-                <YAxis dataKey="name" type="category" stroke={TEXT_MUTED} fontSize={12} width={80} />
-                <Tooltip contentStyle={tooltipStyle} />
-                <Bar dataKey="value" fill={GOLD} radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {billingData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={billingData} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(201,168,76,0.1)" />
+                  <XAxis type="number" stroke={TEXT_MUTED} fontSize={12} />
+                  <YAxis dataKey="name" type="category" stroke={TEXT_MUTED} fontSize={12} width={80} />
+                  <Tooltip contentStyle={tooltipStyle} />
+                  <Bar dataKey="value" fill={GOLD} radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[250px] flex items-center justify-center" style={{ color: 'var(--text-muted)' }}>No data available</div>
+            )}
           </div>
         </div>
 
@@ -212,10 +236,9 @@ const Dashboard = () => {
               <BarChart3 className="w-5 h-5" style={{ color: 'var(--accent)' }} />
               <h3 className="text-lg font-medium" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-primary)' }}>Recent Activity</h3>
             </div>
-            <button className="text-sm transition-colors" style={{ color: 'var(--text-muted)', background: 'none', border: 'none' }}>View All →</button>
           </div>
           <div className="space-y-4">
-            {recentAlerts.map((alert, index) => (
+            {recentAlerts.length > 0 ? recentAlerts.map((alert, index) => (
               <div key={index} className="flex items-start gap-4 p-4 rounded-lg" style={{ background: 'var(--surface)' }}>
                 {getAlertIcon(alert.type)}
                 <div className="flex-1 min-w-0">
@@ -226,9 +249,12 @@ const Dashboard = () => {
                   </div>
                 </div>
               </div>
-            ))}
+            )) : (
+              <p className="text-sm text-center py-6" style={{ color: 'var(--text-muted)' }}>No recent activity</p>
+            )}
           </div>
         </div>
+
       </div>
     </div>
   );

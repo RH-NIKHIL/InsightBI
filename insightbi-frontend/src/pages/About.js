@@ -31,7 +31,7 @@ const About = () => {
     { year: '2021', title: 'First Module', description: 'Launched Customer Satisfaction module with predictive ML capabilities.' },
     { year: '2022', title: 'Full Suite', description: 'Expanded to four core modules including demand forecasting and billing anomaly detection.' },
     { year: '2023', title: 'Enterprise Scale', description: 'Reached 500+ enterprise clients worldwide with 99% prediction accuracy.' },
-    { year: '2024', title: 'Next Generation', description: 'Introducing advanced neural networks and real-time streaming analytics.' },
+    { year: '2024', title: 'Next Generation', description: 'Introducing advanced AI capabilities and real-time streaming analytics.' },
   ];
 
   const values = [
@@ -72,7 +72,7 @@ const About = () => {
             </p>
             <p className="text-[0.9rem] leading-[1.8]" style={{ color: 'var(--text-secondary)' }}>
               Our four intelligent modules work together to provide a comprehensive view of customer sentiment, 
-              market demand, pricing dynamics, and financial integrity — all powered by cutting-edge machine learning.
+              market demand, pricing dynamics, and financial integrity — all powered by cutting-edge AI.
             </p>
           </div>
 

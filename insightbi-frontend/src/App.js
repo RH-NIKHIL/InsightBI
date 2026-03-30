@@ -27,7 +27,7 @@ import StaffManagement from './pages/StaffManagement';
 const Layout = ({ children }) => {
   const location = useLocation();
   const authPages = ['/login', '/forgot-password'];
-  const portalPages = ['/user-dashboard', '/customer-satisfaction', '/staff-dashboard', '/staff-management'];
+  const portalPages = ['/user-dashboard', '/customer-satisfaction', '/staff-dashboard', '/staff-management', '/dashboard', '/demand-forecast', '/price-volatility', '/billing-anomaly', '/profile'];
   const isAuthPage = authPages.includes(location.pathname);
   const isPortalPage = portalPages.includes(location.pathname);
 

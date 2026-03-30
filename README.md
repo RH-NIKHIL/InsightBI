@@ -454,7 +454,7 @@ Each role accesses their permitted modules (detailed below), where they can view
 Predicts future energy demand based on historical usage data.
 - Frontend requests `/api/demand-forecast` to render historical charts.
 - Clicking **"Run Forecast"** hits `POST /api/demand-forecast/generate`.
-- The backend simulates an ML model, returning projected data points rendered as interactive line graphs in real-time.
+- The backend simulates an AI engine, returning projected data points rendered as interactive line graphs in real-time.
 
 ### 2. Price Volatility Analysis (Admin)
 Tracks energy market price fluctuations to optimize purchasing and selling strategies.
@@ -492,7 +492,7 @@ InsightBI uses **Razorpay** for secure payment processing in the billing flow.
 ## 🔮 Future Roadmap
 
 - [x] **Persistent Database** — Migrated from in-memory store to MongoDB with `AnalyticsSnapshot` model
-- [ ] **ML Microservices** — Replace simulated forecasting with actual predictive neural networks (TensorFlow/PyTorch) via a Python FastAPI microservice layer
+- [ ] **AI Microservices** — Replace simulated forecasting with actual AI-powered predictive engines via a Python FastAPI microservice layer
 - [ ] **Real-Time Notifications** — WebSocket-based alerts for billing anomalies and demand spikes
 - [ ] **Export & Reporting** — PDF/CSV export for dashboard analytics and forecast reports
 - [ ] **Multi-Tenancy** — Support for multiple energy providers on a single platform

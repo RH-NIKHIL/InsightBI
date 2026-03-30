@@ -18,6 +18,7 @@
 - [Architecture](#-architecture)
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
+- [Git Commands](#-git-commands)
 - [Environment Variables](#-environment-variables)
 - [API Endpoints](#-api-endpoints)
 - [Role-Based Access Control](#-role-based-access-control)
@@ -78,10 +79,12 @@ The application features a **React 19** frontend with **Tailwind CSS** styling a
 | **CORS** | Cross-origin resource sharing |
 | **dotenv** | Environment variable management |
 
-### Data Store
+### Database
 | Technology | Purpose |
 |---|---|
-| **In-Memory JSON Store** | Fast prototyping data layer (`data/store.js`) |
+| **MongoDB** | NoSQL persistent database for all analytics, users, staff, and billing data |
+| **Mongoose** | MongoDB object modelling (ODM) |
+| **AnalyticsSnapshot** | Single flexible model storing all 4 analytics module snapshots |
 
 ---
 
@@ -258,6 +261,94 @@ The React app will open at **http://localhost:3000**.
 
 ---
 
+## 🗂️ Git Commands
+
+Common Git commands used throughout this project's development lifecycle.
+
+### Repository Setup
+
+```bash
+# Initialize a new Git repository
+git init
+
+# Clone the repository
+git clone https://github.com/RH-NIKHIL/InsightBI.git
+cd InsightBI
+```
+
+### Daily Workflow
+
+```bash
+# Check status of working directory
+git status
+
+# Stage all changes
+git add .
+
+# Stage a specific file
+git add backend/routes/dashboard.js
+
+# Commit staged changes with a message
+git commit -m "your commit message"
+
+# Push changes to remote (first time)
+git push -u origin master
+
+# Push changes to remote (subsequent times)
+git push
+
+# Pull latest changes from remote
+git pull origin master
+```
+
+### Branching
+
+```bash
+# List all branches
+git branch
+
+# Create a new branch
+git branch feature/new-module
+
+# Switch to a branch
+git checkout feature/new-module
+
+# Create and switch to a new branch in one step
+git checkout -b feature/new-module
+
+# Merge a branch into master
+git checkout master
+git merge feature/new-module
+```
+
+### History & Logs
+
+```bash
+# View commit history
+git log
+
+# View compact one-line log
+git log --oneline
+
+# View changes in a specific commit
+git show <commit-hash>
+```
+
+### Undoing Changes
+
+```bash
+# Unstage a file (keep changes)
+git reset HEAD <file>
+
+# Discard changes in working directory
+git checkout -- <file>
+
+# Revert to a previous commit (safe)
+git revert <commit-hash>
+```
+
+---
+
 ## 🔐 Environment Variables
 
 Create a `.env` file in the `backend/` directory with the following variables:
@@ -400,7 +491,7 @@ InsightBI uses **Razorpay** for secure payment processing in the billing flow.
 
 ## 🔮 Future Roadmap
 
-- [ ] **Persistent Database** — Migrate from in-memory store to MongoDB or PostgreSQL for scalable, persistent storage
+- [x] **Persistent Database** — Migrated from in-memory store to MongoDB with `AnalyticsSnapshot` model
 - [ ] **ML Microservices** — Replace simulated forecasting with actual predictive neural networks (TensorFlow/PyTorch) via a Python FastAPI microservice layer
 - [ ] **Real-Time Notifications** — WebSocket-based alerts for billing anomalies and demand spikes
 - [ ] **Export & Reporting** — PDF/CSV export for dashboard analytics and forecast reports
@@ -415,5 +506,5 @@ This project is developed as an academic major project. All rights reserved.
 ---
 
 <p align="center">
-  <strong>Built with ❤️ using React, Node.js & Express</strong>
+  <strong>Built using React, Node.js & Express</strong>
 </p>

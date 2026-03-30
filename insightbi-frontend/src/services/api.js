@@ -38,6 +38,15 @@ export const authAPI = {
 
   changePassword: (currentPassword, newPassword) =>
     request('/auth/password', { method: 'PUT', body: JSON.stringify({ currentPassword, newPassword }) }),
+
+  // Staff management endpoints
+  createStaff: (name, email, password) =>
+    request('/auth/create-staff', { method: 'POST', body: JSON.stringify({ name, email, password }) }),
+
+  getStaffList: () => request('/auth/staff-list'),
+
+  deleteStaff: (staffId) =>
+    request(`/auth/delete-staff/${staffId}`, { method: 'DELETE' }),
 };
 
 // ── User Auth API ──

@@ -148,8 +148,8 @@ const About = () => {
           <p className="section-subtitle mb-10">
             Discover how InsightBI can transform your business intelligence.
           </p>
-          <Link to="/register" className="btn-primary inline-flex items-center gap-2">
-            <span>Get Started</span>
+          <Link to="/login" className="btn-primary inline-flex items-center gap-2">
+            <span>Sign In</span>
             <ArrowRight className="w-5 h-5" />
           </Link>
         </div>

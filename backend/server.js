@@ -1,7 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const { CORS_ORIGIN, PORT } = require('./config');
-const { initStore } = require('./data/store');
+const connectDB = require('./db');
+const seedDatabase = require('./seed');
+const seedAnalytics = require('./seedAnalytics');
 
 const app = express();
 
@@ -35,7 +37,16 @@ app.get('/api/health', (req, res) => {
 
 // Start server
 const start = async () => {
-  await initStore();
+  // Connect to MongoDB
+  await connectDB();
+
+  // Seed database with default accounts (Admin, User, Staff)
+  await seedDatabase();
+
+  // Seed analytics data into MongoDB (idempotent)
+  console.log('📊 Seeding analytics data to MongoDB...');
+  await seedAnalytics();
+
   app.listen(PORT, () => {
     console.log(`\n🚀 InsightBI Backend running on http://localhost:${PORT}`);
     console.log(`   CORS enabled for: ${CORS_ORIGIN}\n`);

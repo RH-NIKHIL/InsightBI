@@ -21,12 +21,13 @@ import Login from './pages/Login';
 import Profile from './pages/Profile';
 import UserDashboard from './pages/UserDashboard';
 import BillingStaffDashboard from './pages/BillingStaffDashboard';
+import StaffManagement from './pages/StaffManagement';
 
 // Layout component to conditionally render Navbar and Footer
 const Layout = ({ children }) => {
   const location = useLocation();
   const authPages = ['/login', '/forgot-password'];
-  const portalPages = ['/user-dashboard', '/customer-satisfaction', '/staff-dashboard'];
+  const portalPages = ['/user-dashboard', '/customer-satisfaction', '/staff-dashboard', '/staff-management'];
   const isAuthPage = authPages.includes(location.pathname);
   const isPortalPage = portalPages.includes(location.pathname);
 
@@ -82,6 +83,11 @@ function App() {
                   <Route path="/dashboard" element={
                     <ProtectedRoute>
                       <Dashboard />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/staff-management" element={
+                    <ProtectedRoute>
+                      <StaffManagement />
                     </ProtectedRoute>
                   } />
                   <Route path="/demand-forecast" element={

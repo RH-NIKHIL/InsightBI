@@ -3,7 +3,8 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET, JWT_EXPIRES_IN } = require('../config');
-const { users, getUserDashboardData } = require('../data/store');
+const { User } = require('../models');
+const { getUserDashboardData } = require('../data/store');
 const auth = require('../middleware/auth');
 
 // POST /api/user-auth/register
@@ -16,26 +17,32 @@ router.post('/register', async (req, res) => {
     if (password.length < 6) {
       return res.status(400).json({ error: 'Password must be at least 6 characters' });
     }
-    const existing = users.find(u => u.email === email);
+
+    const existing = await User.findOne({ email });
     if (existing) {
       return res.status(400).json({ error: 'Email already registered' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = {
-      id: Date.now().toString(),
+    const newUser = await User.create({
       name,
       email,
       password: hashedPassword,
       role: 'user',
-      createdAt: new Date().toISOString(),
-    };
-    users.push(newUser);
+    });
 
-    const token = jwt.sign({ id: newUser.id, email: newUser.email, role: 'user' }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
-    const { password: _, ...userData } = newUser;
+    const token = jwt.sign({ id: newUser._id, email: newUser.email, role: 'user' }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 
-    res.status(201).json({ token, user: userData });
+    res.status(201).json({
+      token,
+      user: {
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+        createdAt: newUser.createdAt,
+      }
+    });
   } catch (error) {
     res.status(500).json({ error: 'Server error during registration' });
   }
@@ -49,7 +56,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    const user = users.find(u => u.email === email);
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
@@ -59,21 +66,41 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    const token = jwt.sign({ id: user.id, email: user.email, role: 'user' }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
-    const { password: _, ...userData } = user;
+    const token = jwt.sign({ id: user._id, email: user.email, role: 'user' }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 
-    res.json({ token, user: userData });
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        createdAt: user.createdAt,
+      }
+    });
   } catch (error) {
     res.status(500).json({ error: 'Server error during login' });
   }
 });
 
 // GET /api/user-auth/profile
-router.get('/profile', auth, (req, res) => {
-  const user = users.find(u => u.id === req.user.id);
-  if (!user) return res.status(404).json({ error: 'User not found' });
-  const { password: _, ...userData } = user;
-  res.json(userData);
+router.get('/profile', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      createdAt: user.createdAt,
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error fetching profile' });
+  }
 });
 
 // GET /api/user-auth/dashboard

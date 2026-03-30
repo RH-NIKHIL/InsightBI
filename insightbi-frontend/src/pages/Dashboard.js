@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   TrendingUp, DollarSign, FileWarning, ArrowUpRight,
-  Activity, AlertTriangle, CheckCircle, Clock, ArrowUp, ArrowDown, BarChart3
+  Activity, AlertTriangle, CheckCircle, Clock, ArrowUp, ArrowDown, BarChart3, Users
 } from 'lucide-react';
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
@@ -86,12 +86,21 @@ const Dashboard = () => {
     <div className="min-h-screen pt-24 pb-12" style={{ background: 'var(--bg-primary)' }}>
       <div className="max-w-[1400px] mx-auto px-5 md:px-10 lg:px-[60px]">
         {/* Header */}
-        <div className="mb-10">
-          <span className="section-tag">Command Center</span>
-          <h1 className="section-title">Dashboard</h1>
-          <p className="text-[0.9rem]" style={{ color: 'var(--text-secondary)' }}>
-            Overview of all AI-powered business intelligence modules
-          </p>
+        <div className="mb-10 flex items-start justify-between flex-wrap gap-4">
+          <div>
+            <span className="section-tag">Command Center</span>
+            <h1 className="section-title">Dashboard</h1>
+            <p className="text-[0.9rem]" style={{ color: 'var(--text-secondary)' }}>
+              Overview of all AI-powered business intelligence modules
+            </p>
+          </div>
+          <Link
+            to="/staff-management"
+            className="btn-outline flex items-center gap-2 text-sm"
+          >
+            <Users className="w-4 h-4" />
+            <span>Manage Staff</span>
+          </Link>
         </div>
 
         {/* Module Cards */}

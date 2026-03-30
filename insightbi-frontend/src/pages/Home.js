@@ -181,15 +181,10 @@ const Home = () => {
                 <ArrowRight className="w-5 h-5" />
               </Link>
             ) : (
-              <>
-                <Link to="/register" className="btn-primary flex items-center gap-2">
-                  <span>Get Started</span>
-                  <ArrowRight className="w-5 h-5" />
-                </Link>
-                <Link to="/login" className="btn-secondary flex items-center gap-2">
-                  Sign In
-                </Link>
-              </>
+              <Link to="/login" className="btn-primary flex items-center gap-2">
+                <span>Sign In</span>
+                <ArrowRight className="w-5 h-5" />
+              </Link>
             )}
           </div>
         </div>
@@ -398,7 +393,7 @@ const Home = () => {
       <section className="relative min-h-[500px] h-[80vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 50%, rgba(201,168,76,0.06) 0%, rgba(6,6,6,1) 70%)' }} />
         <div ref={addRevealRef} className="reveal-up relative z-[2] text-center max-w-[700px] px-6">
-          <span className="section-tag">Get Started Today</span>
+          <span className="section-tag">Start Your Journey</span>
           <h2
             className="mb-5"
             style={{
@@ -424,8 +419,8 @@ const Home = () => {
               Go to Dashboard
             </Link>
           ) : (
-            <Link to="/register" className="btn-primary text-[0.78rem] py-4 px-12">
-              Start Free Trial
+            <Link to="/login" className="btn-primary text-[0.78rem] py-4 px-12">
+              Sign In
             </Link>
           )}
         </div>

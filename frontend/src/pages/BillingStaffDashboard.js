@@ -377,12 +377,12 @@ const BillingStaffDashboard = () => {
               </div>
             ) : (
               history.map(bill => (
-                <div key={bill.id} className="p-6" style={cardStyle}>
+                <div key={bill._id} className="p-6" style={cardStyle}>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
                     <div>
                       <div className="flex items-center gap-3">
-                        <span className="text-base font-semibold" style={{ fontFamily: 'var(--font-heading)', color: GOLD }}>{bill.id}</span>
-                        <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(34,197,94,0.15)', color: '#4ade80' }}>Paid</span>
+                        <span className="text-base font-semibold" style={{ fontFamily: 'var(--font-heading)', color: GOLD }}>{bill.billNumber}</span>
+                        <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: bill.status === 'paid' ? 'rgba(34,197,94,0.15)' : 'rgba(201,168,76,0.15)', color: bill.status === 'paid' ? '#4ade80' : GOLD }}>{bill.status}</span>
                       </div>
                       <p className="text-xs mt-1 flex items-center gap-1" style={{ color: TEXT_MUTED }}>
                         <Clock className="w-3 h-3" /> {new Date(bill.createdAt).toLocaleString()}
@@ -390,16 +390,15 @@ const BillingStaffDashboard = () => {
                     </div>
                     <span className="text-xl font-semibold mt-2 sm:mt-0" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-primary)' }}>₹{bill.total.toFixed(2)}</span>
                   </div>
-                  <div className="flex items-center gap-4 mb-3 text-sm" style={{ color: TEXT_SEC }}>
-                    <span className="flex items-center gap-1"><User className="w-3.5 h-3.5" />{bill.customer.name}</span>
-                    <span className="flex items-center gap-1"><Mail className="w-3.5 h-3.5" />{bill.customer.email}</span>
-                    <span className="flex items-center gap-1"><Phone className="w-3.5 h-3.5" />{bill.customer.phone}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-3 text-sm" style={{ color: TEXT_SEC }}>
+                    <span className="flex items-center gap-1"><User className="w-3.5 h-3.5" />{bill.customerName}</span>
+                    <span className="flex items-center gap-1"><Mail className="w-3.5 h-3.5" />{bill.customerEmail}</span>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
                         <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                          {['Product', 'SKU', 'Price', 'Qty', 'Subtotal'].map(h => (
+                          {['Product', 'Price', 'Qty', 'Total'].map(h => (
                             <th key={h} className="text-left py-2 text-[0.65rem] font-medium tracking-[0.1em] uppercase" style={{ color: TEXT_MUTED }}>{h}</th>
                           ))}
                         </tr>
@@ -407,15 +406,18 @@ const BillingStaffDashboard = () => {
                       <tbody>
                         {bill.items.map((item, i) => (
                           <tr key={i} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                            <td className="py-2" style={{ color: 'var(--text-primary)' }}>{item.name}</td>
-                            <td className="py-2" style={{ color: TEXT_MUTED }}>{item.sku}</td>
+                            <td className="py-2" style={{ color: 'var(--text-primary)' }}>{item.productName}</td>
                             <td className="py-2" style={{ color: TEXT_SEC }}>₹{item.price}</td>
                             <td className="py-2" style={{ color: TEXT_SEC }}>{item.quantity}</td>
-                            <td className="py-2 font-medium" style={{ color: GOLD }}>₹{item.subtotal.toFixed(2)}</td>
+                            <td className="py-2 font-medium" style={{ color: GOLD }}>₹{item.total.toFixed(2)}</td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
+                  </div>
+                  <div className="flex justify-end gap-8 mt-4 pt-4 text-sm" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                    <div><span style={{ color: TEXT_MUTED }}>Subtotal: </span><span style={{ color: 'var(--text-primary)' }}>₹{bill.subtotal.toFixed(2)}</span></div>
+                    <div><span style={{ color: TEXT_MUTED }}>Tax: </span><span style={{ color: 'var(--text-primary)' }}>₹{bill.tax.toFixed(2)}</span></div>
                   </div>
                 </div>
               ))

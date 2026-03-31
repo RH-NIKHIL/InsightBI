@@ -3,7 +3,7 @@ const cors = require('cors');
 const { CORS_ORIGIN, PORT } = require('./config');
 const connectDB = require('./db');
 const seedDatabase = require('./seed');
-const seedAnalytics = require('./seedAnalytics');
+const { initStore } = require('./data/store');
 
 const app = express();
 
@@ -40,12 +40,11 @@ const start = async () => {
   // Connect to MongoDB
   await connectDB();
 
-  // Seed database with default accounts (Admin, User, Staff)
+  // Seed database with default accounts
   await seedDatabase();
 
-  // Seed analytics data into MongoDB (idempotent)
-  console.log('📊 Seeding analytics data to MongoDB...');
-  await seedAnalytics();
+  // Initialize in-memory store for analytics data (keeping this for now)
+  await initStore();
 
   app.listen(PORT, () => {
     console.log(`\n🚀 InsightBI Backend running on http://localhost:${PORT}`);

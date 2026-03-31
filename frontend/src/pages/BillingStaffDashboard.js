@@ -4,7 +4,7 @@ import { useStaffAuth } from '../context/StaffAuthContext';
 import { billingStaffAPI, paymentAPI } from '../services/api';
 import {
   ShoppingCart, Plus, Minus, Trash2, Search, Star, Send, LogOut,
-  Receipt, Clock, User, Mail, Phone, MessageSquare, CheckCircle, Package, ArrowLeft
+  Receipt, Clock, User, Mail, Phone, MessageSquare, CheckCircle, Package, ArrowLeft, Download, Printer, Eye, Trash
 } from 'lucide-react';
 
 const GOLD = '#c9a84c';
@@ -28,6 +28,7 @@ const BillingStaffDashboard = () => {
   const [success, setSuccess] = useState(null);
   const [error, setError] = useState('');
   const [hoverRating, setHoverRating] = useState(0);
+  const [viewingBill, setViewingBill] = useState(null);
 
   useEffect(() => {
     billingStaffAPI.getProducts().then(setProducts).catch(() => {});
@@ -59,6 +60,82 @@ const BillingStaffDashboard = () => {
   };
 
   const removeFromCart = (productId) => setCart(prev => prev.filter(i => i.productId !== productId));
+
+  // Bill action handlers
+  const handleViewBill = (bill) => {
+    setViewingBill(bill);
+  };
+
+  const handleDownloadBill = (bill) => {
+    const billContent = `
+INVOICE
+Bill Number: ${bill.billNumber}
+Date: ${new Date(bill.createdAt).toLocaleDateString('en-IN')}
+Customer: ${bill.customerName}
+Email: ${bill.customerEmail}
+
+ITEMS:
+${bill.items.map(item => `${item.productName} x${item.quantity} @ ₹${item.price} = ₹${item.total}`).join('\n')}
+
+Subtotal: ₹${bill.subtotal.toFixed(2)}
+Tax (18%): ₹${bill.tax.toFixed(2)}
+Total: ₹${bill.total.toFixed(2)}
+Status: ${bill.status.toUpperCase()}
+    `.trim();
+    
+    const element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(billContent));
+    element.setAttribute('download', `${bill.billNumber}.txt`);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+
+  const handlePrintBill = (bill) => {
+    const printWindow = window.open('', '', 'height=600,width=800');
+    const billHTML = `
+      <html><head><title>${bill.billNumber}</title>
+      <style>
+        body { font-family: Arial; margin: 20px; }
+        h1 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .total { text-align: right; font-weight: bold; }
+        .footer { margin-top: 40px; text-align: center; color: #666; font-size: 12px; }
+      </style>
+      </head><body>
+      <h1>INVOICE</h1>
+      <p><strong>Bill Number:</strong> ${bill.billNumber}</p>
+      <p><strong>Date:</strong> ${new Date(bill.createdAt).toLocaleDateString('en-IN')}</p>
+      <p><strong>Customer:</strong> ${bill.customerName}</p>
+      <p><strong>Email:</strong> ${bill.customerEmail}</p>
+      <table>
+        <tr><th>Product</th><th>Price</th><th>Qty</th><th>Total</th></tr>
+        ${bill.items.map(item => `<tr><td>${item.productName}</td><td>₹${item.price}</td><td>${item.quantity}</td><td>₹${item.total.toFixed(2)}</td></tr>`).join('')}
+      </table>
+      <div style="text-align: right; margin-right: 20px;">
+        <p>Subtotal: ₹${bill.subtotal.toFixed(2)}</p>
+        <p>Tax (18%): ₹${bill.tax.toFixed(2)}</p>
+        <p style="font-size: 18px; font-weight: bold;">Total: ₹${bill.total.toFixed(2)}</p>
+      </div>
+      <div class="footer">
+        <p>Status: ${bill.status.toUpperCase()}</p>
+        <p>Thank you for your business!</p>
+      </div>
+      </body></html>
+    `;
+    printWindow.document.write(billHTML);
+    printWindow.document.close();
+    printWindow.print();
+  };
+
+  const handleDeleteBill = async (billId) => {
+    if (window.confirm('Are you sure you want to delete this bill?')) {
+      setHistory(prev => prev.filter(b => b._id !== billId));
+    }
+  };
 
   const subtotal = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const tax = Math.round(subtotal * 0.18 * 100) / 100;
@@ -419,9 +496,104 @@ const BillingStaffDashboard = () => {
                     <div><span style={{ color: TEXT_MUTED }}>Subtotal: </span><span style={{ color: 'var(--text-primary)' }}>₹{bill.subtotal.toFixed(2)}</span></div>
                     <div><span style={{ color: TEXT_MUTED }}>Tax: </span><span style={{ color: 'var(--text-primary)' }}>₹{bill.tax.toFixed(2)}</span></div>
                   </div>
+                  <div className="flex items-center gap-3 mt-4 pt-4" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                    <button onClick={() => handleViewBill(bill)} className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-all" style={{ background: 'rgba(201,168,76,0.1)', color: GOLD, border: 'none', cursor: 'pointer' }}>
+                      <Eye className="w-4 h-4" /><span>View</span>
+                    </button>
+                    <button onClick={() => handleDownloadBill(bill)} className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-all" style={{ background: 'rgba(201,168,76,0.1)', color: GOLD, border: 'none', cursor: 'pointer' }}>
+                      <Download className="w-4 h-4" /><span>Download</span>
+                    </button>
+                    <button onClick={() => handlePrintBill(bill)} className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-all" style={{ background: 'rgba(201,168,76,0.1)', color: GOLD, border: 'none', cursor: 'pointer' }}>
+                      <Printer className="w-4 h-4" /><span>Print</span>
+                    </button>
+                  </div>
                 </div>
               ))
             )}
+          </div>
+        )}
+
+        {/* View Bill Modal */}
+        {viewingBill && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-[#1a1a1a] rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-semibold" style={{ fontFamily: 'var(--font-heading)', color: GOLD }}>Invoice</h2>
+                <button onClick={() => setViewingBill(null)} className="text-lg" style={{ background: 'none', border: 'none', color: TEXT_SEC, cursor: 'pointer' }}>✕</button>
+              </div>
+              
+              <div className="space-y-4 mb-6">
+                <div className="flex justify-between">
+                  <span style={{ color: TEXT_SEC }}>Bill Number:</span>
+                  <span style={{ color: 'var(--text-primary)' }}>{viewingBill.billNumber}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span style={{ color: TEXT_SEC }}>Date:</span>
+                  <span style={{ color: 'var(--text-primary)' }}>{new Date(viewingBill.createdAt).toLocaleDateString('en-IN')}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span style={{ color: TEXT_SEC }}>Time:</span>
+                  <span style={{ color: 'var(--text-primary)' }}>{new Date(viewingBill.createdAt).toLocaleTimeString('en-IN')}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span style={{ color: TEXT_SEC }}>Status:</span>
+                  <span style={{ color: viewingBill.status === 'paid' ? '#4ade80' : GOLD }}>{viewingBill.status.toUpperCase()}</span>
+                </div>
+              </div>
+
+              <div style={{ borderTop: '1px solid var(--border-subtle)', borderBottom: '1px solid var(--border-subtle)', paddingTop: '16px', paddingBottom: '16px', marginBottom: '16px' }}>
+                <h3 className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Customer Details</h3>
+                <p style={{ color: TEXT_SEC }}>Name: {viewingBill.customerName}</p>
+                <p style={{ color: TEXT_SEC }}>Email: {viewingBill.customerEmail}</p>
+              </div>
+
+              <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Items</h3>
+              <table className="w-full text-sm mb-6">
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                    <th className="text-left py-2" style={{ color: TEXT_MUTED }}>Product</th>
+                    <th className="text-left py-2" style={{ color: TEXT_MUTED }}>Price</th>
+                    <th className="text-left py-2" style={{ color: TEXT_MUTED }}>Qty</th>
+                    <th className="text-right py-2" style={{ color: TEXT_MUTED }}>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {viewingBill.items.map((item, i) => (
+                    <tr key={i} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                      <td className="py-2" style={{ color: 'var(--text-primary)' }}>{item.productName}</td>
+                      <td className="py-2" style={{ color: TEXT_SEC }}>₹{item.price}</td>
+                      <td className="py-2" style={{ color: TEXT_SEC }}>{item.quantity}</td>
+                      <td className="py-2 text-right font-medium" style={{ color: GOLD }}>₹{item.total.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <div className="space-y-2 mb-6" style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '16px' }}>
+                <div className="flex justify-between">
+                  <span style={{ color: TEXT_SEC }}>Subtotal:</span>
+                  <span style={{ color: 'var(--text-primary)' }}>₹{viewingBill.subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span style={{ color: TEXT_SEC }}>Tax (18%):</span>
+                  <span style={{ color: 'var(--text-primary)' }}>₹{viewingBill.tax.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-lg font-semibold">
+                  <span style={{ color: 'var(--text-primary)' }}>Total:</span>
+                  <span style={{ color: GOLD, fontFamily: 'var(--font-heading)' }}>₹{viewingBill.total.toFixed(2)}</span>
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <button onClick={() => handlePrintBill(viewingBill)} className="flex-1 btn-primary flex items-center justify-center gap-2">
+                  <Printer className="w-4 h-4" /><span>Print</span>
+                </button>
+                <button onClick={() => handleDownloadBill(viewingBill)} className="flex-1 btn-secondary flex items-center justify-center gap-2">
+                  <Download className="w-4 h-4" /><span>Download</span>
+                </button>
+                <button onClick={() => setViewingBill(null)} className="flex-1 btn-secondary">Close</button>
+              </div>
+            </div>
           </div>
         )}
       </div>

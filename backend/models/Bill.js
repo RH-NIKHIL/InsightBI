@@ -39,6 +39,9 @@ const billSchema = new mongoose.Schema({
     enum: ['pending', 'paid', 'cancelled'],
     default: 'pending',
   },
+  paymentId: {
+    type: String,
+  },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Staff',

@@ -65,6 +65,8 @@ router.post('/create', auth, async (req, res) => {
     const isValidObjectId = mongoose.Types.ObjectId.isValid(req.user.id);
 
     // Save bill to MongoDB
+    // If paymentId is provided, mark as paid; otherwise pending
+    const { paymentId } = req.body;
     const bill = await Bill.create({
       billNumber,
       customerName: customer.name,
@@ -73,7 +75,8 @@ router.post('/create', auth, async (req, res) => {
       subtotal,
       tax,
       total,
-      status: 'pending',
+      status: paymentId ? 'paid' : 'pending',
+      ...(paymentId && { paymentId }),
       ...(isValidObjectId && { createdBy: req.user.id }),
     });
 
@@ -119,10 +122,11 @@ router.post('/create', auth, async (req, res) => {
   }
 });
 
-// GET /api/billing/history — get staff's bill history from MongoDB
+// GET /api/billing/history — get staff's paid bills from MongoDB
 router.get('/history', auth, async (req, res) => {
   try {
-    const bills = await Bill.find({ createdBy: req.user.id }).sort({ createdAt: -1 });
+    // Only fetch paid bills (no pending)
+    const bills = await Bill.find({ createdBy: req.user.id, status: 'paid' }).sort({ createdAt: -1 });
     res.json(bills);
   } catch (error) {
     res.status(500).json({ error: 'Server error fetching billing history' });

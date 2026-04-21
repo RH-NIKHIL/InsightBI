@@ -47,6 +47,7 @@ The application features a **React 19** frontend with **Tailwind CSS** styling a
 | 📈 **Demand Forecasting** | Predict future energy demand based on historical consumption data with interactive charts |
 | 💹 **Price Volatility Analysis** | Track energy market price fluctuations, calculate variance, and identify high-risk pricing periods |
 | 🔎 **Billing Anomaly Detection** | Flag irregular billing amounts or impossible consumption jumps to prevent fraud or hardware errors |
+| 🤖 **Context-Aware AI Assistant** | Google Gemini-powered chat panel injected with live dashboard data for real-time risk, anomaly, and forecast insights |
 | 😊 **Customer Satisfaction** | Collect user feedback and perform simulated AI-based sentiment analysis with NPS scoring |
 | 💳 **Razorpay Payments** | Integrated Razorpay Checkout for secure payment processing during billing |
 | 💼 **Billing Staff Portal** | Dedicated dashboard for billing management and customer account resolution |

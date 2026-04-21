@@ -48,6 +48,7 @@ By utilizing real-time data analytics with advanced forecasting and anomaly dete
 - **Price Volatility Analysis**: Track market price fluctuations and risk assessment
 - **Billing Anomaly Detection**: Flag irregular billing patterns
 - **Customer Satisfaction**: Collect user feedback and sentiment analysis
+- **Context-Aware AI Assistant**: Live AI insights powered by Google Gemini
 - **Razorpay Payment Integration**: Secure payment processing
 - **Dark/Light Mode**: Theme support via React Context API
 - **Role-Based Access Control**: Protected routes for each user type
@@ -739,7 +740,13 @@ User enters email + password → Validate input
 - Net Promoter Score (NPS) calculation
 - Satisfaction trend tracking
 
-### 5. Role-Based Access Control (RBAC)
+### 5. Context-Aware AI Assistant
+- Powered by Google Gemini 1.5 Flash via REST API
+- Injected with real-time, page-specific dashboard data
+- Provides contextual insights on price volatility, anomalies, and demand forecasting
+- Streams responses seamlessly in a floating chat UI
+
+### 6. Role-Based Access Control (RBAC)
 
 | Role | Capabilities |
 |------|--------------|
@@ -747,7 +754,7 @@ User enters email + password → Validate input
 | **Billing Staff** | Invoice creation, customer management, payment processing, personal dashboard |
 | **Consumer/User** | View personal consumption, submit feedback, access personal dashboard |
 
-### 6. Payment Integration (Razorpay)
+### 7. Payment Integration (Razorpay)
 - Create orders
 - Process payments
 - Verify signatures

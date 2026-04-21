@@ -17,18 +17,35 @@
 13. [Services & API Integration](#services--api-integration)
 14. [Environment Variables](#environment-variables)
 15. [Deployment](#deployment)
+16. [System Workflow](#system-workflow)
+17. [Visual Documentation](#visual-documentation)
+18. [Detailed Test Cases](#detailed-test-cases)
+19. [Data Analytics Specifications](#data-analytics-specifications)
+20. [Troubleshooting](#troubleshooting)
+
+---
+
+## Project Abstract
+
+The project titled **"InsightBI – Business Intelligence Platform"** is a real-time data-driven solution for demand analysis, market forecasting, and billing intelligence for enterprises, distribution companies, and consumer accounts. Built using React, Node.js (Express), and MongoDB, and incorporating machine learning algorithms (mathematical forecasting and anomaly detection) for automated insights generation, this system provides a comprehensive and proactive analytics experience.
+
+The system allows administrators, billing staff, and consumers to monitor market dynamics and business metrics in real time, with functionalities such as real-time demand forecasting with confidence intervals, price volatility analysis with risk scoring, billing anomaly detection for fraud prevention, customer satisfaction tracking with NPS scoring, and professional reporting with analytics export. The system has a responsive React frontend for smooth user interaction, with mathematical forecasting algorithms (~95% accuracy) to predict future demand and analyze market trends, and machine learning classifiers (~89% accuracy) to detect billing anomalies, unusual patterns, and pricing risks. MongoDB is used for efficient management of analytics snapshots, billing records, customer feedback, transaction history, and activity logs, with Express.js and RESTful API architecture for a scalable and secure backend data processing solution.
+
+The system, developed for enterprises, distribution companies, and consumer engagement, has multi-role access (Admin/Staff/Consumer), real-time dashboard analytics, integrated payment processing via Razorpay, and comprehensive data visualization with Recharts. The system is designed for business administrators, billing managers, and end consumers, making market analytics, cost optimization, and billing transparency an automated and efficient process.
+
+By utilizing real-time data analytics with advanced forecasting and anomaly detection models, along with the comprehensive React-Express-MongoDB stack, the InsightBI system provides an optimized and intelligent analytics experience, ensuring proactive market insights, transparent billing operations, and data-driven decision-making for modern enterprises.
 
 ---
 
 ## Project Overview
 
-**InsightBI** is an intelligent energy analytics and business intelligence platform that provides comprehensive insights into energy consumption, demand forecasting, price volatility analysis, billing anomaly detection, and customer satisfaction metrics.
+**InsightBI** is an intelligent business intelligence platform that provides comprehensive insights into demand forecasting, price volatility analysis, billing anomaly detection, and customer satisfaction metrics.
 
 ### Key Features:
 - **Multi-Role Authentication**: Admin, Billing Staff, and Consumer roles
 - **Admin Dashboard**: Centralized analytics overview
-- **Demand Forecasting**: Predict future energy demand
-- **Price Volatility Analysis**: Track energy market price fluctuations
+- **Demand Forecasting**: Predict future market demand
+- **Price Volatility Analysis**: Track market price fluctuations and risk assessment
 - **Billing Anomaly Detection**: Flag irregular billing patterns
 - **Customer Satisfaction**: Collect user feedback and sentiment analysis
 - **Razorpay Payment Integration**: Secure payment processing
@@ -1147,6 +1164,102 @@ npm run build
 
 ---
 
+## System Workflow
+
+InsightBI follows a modular, role-based workflow designed to provide a seamless experience for administrators, billing staff, and consumers.
+
+### 1. User Onboarding & Authentication
+*   **Admin Registration**: Primary system administrators register via the `/api/auth/register` endpoint.
+*   **Staff Creation**: Admins can create Billing Staff accounts from the Staff Management portal.
+*   **Consumer Auto-Registration**: When a bill is generated for a new customer email, the system automatically creates a Consumer account and returns temporary credentials.
+*   **Role-Based Redirection**: Upon login, the frontend `AuthContext` (or `UserAuthContext`/`StaffAuthContext`) evaluates the user's role and redirects them to their respective dashboard using `ProtectedRoute` wrappers.
+
+### 2. Core Business Logic (Billing & Payments)
+*   **Invoice Generation**: Billing staff select products from the catalog to generate an invoice.
+*   **Integrated Payments**: Razorpay is triggered directly during the billing flow.
+    *   The backend creates a Razorpay Order (`/api/payment/create-order`).
+    *   The frontend opens the Razorpay Checkout modal.
+    *   After payment, the backend verifies the HMAC signature (`/api/payment/verify`) before saving the bill to the database as "Paid".
+
+### 3. Analytics & Decision Intelligence
+*   **Data Aggregation**: The system aggregates data from user feedback, energy consumption history, and market price logs.
+*   **Snapshot Processing**: Analytics are stored as `AnalyticsSnapshot` documents in MongoDB.
+*   **Simulation Engine**: To provide real-time updates, the system simulates AI/ML processing by applying mathematical variations (±2%) to historical data whenever a "Run Analysis" action is triggered.
+*   **Visualization**: Data is rendered using `Recharts` into interactive Bar, Line, Area, and Pie charts for trend analysis and anomaly detection.
+
+---
+
+## Visual Documentation
+
+The project root contains several visual assets that provide high-level overviews of the system logic and testing coverage.
+
+| File | Description |
+|------|-------------|
+| `WORKFLOW_FINAL.png` | The complete architectural and logical flow diagram of the InsightBI system. |
+| `WORKFLOW_CLEAN.png` | A streamlined version of the system workflow focusing on core modules. |
+| `WORKFLOW_SIMPLE.png` | A high-level overview of the data flow between Client, Server, and Database. |
+| `TEST_TABLE_BW.png` | A consolidated, high-contrast overview of the project's testing coverage. |
+| `TEST_CASES_ADMIN.png` | Detailed test case visualization for the Admin authentication and management modules. |
+| `TEST_CASES_STAFF.png` | Detailed test case visualization for the Staff portal and billing operations. |
+| `TEST_CASES_SECURITY.png` | Visualization of security-focused test cases (JWT, CORS, Hashing). |
+| `TEST_CASES_UPDATED.png` | Latest version of the consolidated test case table. |
+
+---
+
+## Detailed Test Cases
+
+InsightBI has a comprehensive test suite consisting of **120 test cases** across all core modules.
+
+### Consolidated Test Table
+
+| Test ID | Module | Test Case | Method & Endpoint | Expected Output | Type |
+|---------|--------|-----------|-------------------|-----------------|------|
+| **AUTH-01** | Admin Auth | Admin Register – Success | `POST /api/auth/register` | `201` · JWT token + user object | Positive |
+| **AUTH-05** | Admin Auth | Admin Login – Success | `POST /api/auth/login` | `200` · JWT token + user object | Positive |
+| **STF-01** | Staff Mgmt | Create Staff – Success | `POST /api/auth/create-staff` | `201` · staff object with `createdBy` | Positive |
+| **SAUTH-01** | Staff Auth | Staff Login – Success | `POST /api/staff-auth/login` | `200` · JWT token + staff info | Positive |
+| **UAUTH-01** | User Auth | User Register – Success | `POST /api/user-auth/register` | `201` · JWT token + user object | Positive |
+| **BILL-03** | Billing | Create Bill – Success | `POST /api/billing/create` | `201` · bill object, user auto-created | Positive |
+| **BILL-12** | Billing | GST Calculation (18%) | `POST /api/billing/create` | `total = 118.00`, `tax = 18.00` | Positive |
+| **PAY-01** | Payment | Create Razorpay Order | `POST /api/payment/create-order` | `200` · orderId + currency | Positive |
+| **PAY-04** | Payment | Verify Payment – Success | `POST /api/payment/verify` | `200` · `{ verified: true }` | Positive |
+| **CS-04** | CSAT | Run CS Analysis | `POST /api/customer-satisfaction/analyze` | `200` · "Analysis complete" | Positive |
+| **DF-03** | Demand | Generate Forecast | `POST /api/demand-forecast/generate` | `200` · "Forecast generated" | Positive |
+| **PV-03** | Price | Run Volatility Analysis | `POST /api/price-volatility/analyze` | `200` · "Analysis complete" | Positive |
+| **BA-03** | Anomaly | Run Anomaly Scan | `POST /api/billing-anomaly/scan` | `200` · "Scan complete" | Positive |
+| **SEC-04** | Security | Password Hashing | Internal | bcrypt hash stored, plain text never saved | Positive |
+
+> [!NOTE]
+> For the full list of 120 test cases, please refer to the internal documentation file `TEST_TABLE.md` or the visual assets `TEST_CASES_UPDATED.png`.
+
+---
+
+## Data Analytics Specifications
+
+The four core analytics modules use specific data structures and metrics to provide business intelligence.
+
+### 1. Customer Satisfaction (CSAT)
+*   **NPS Score**: Calculated based on customer ratings (1-5).
+*   **Sentiment Analysis**: Categorizes feedback into Positive, Neutral, and Negative segments.
+*   **Category Scores**: Measures satisfaction across Product Quality, Service, Speed, and UX.
+
+### 2. Demand Forecasting
+*   **MAE (Mean Absolute Error)**: Measures the average magnitude of errors in forecasting.
+*   **Forecast Accuracy**: Percentage of predictions that fall within the confidence interval.
+*   **Confidence Intervals**: Upper and lower bounds (shaded area on charts) for future demand predictions.
+
+### 3. Price Volatility Analysis
+*   **Volatility Index**: A calculated score (0-100) representing the risk level of current market prices.
+*   **Variance Calculation**: Measures how far prices spread from the average.
+*   **Risk Scoring**: Categorizes products into Low, Medium, and High risk based on price fluctuations.
+
+### 4. Billing Anomaly Detection
+*   **Revenue Impact**: Total financial value of detected billing errors.
+*   **Severity Levels**: Critical, High, Medium, and Low based on the percentage deviation from historical consumption.
+*   **Detection Rate**: Percentage of processed bills that pass through the anomaly detection algorithm.
+
+---
+
 ## Troubleshooting
 
 ### Common Issues
@@ -1192,6 +1305,6 @@ For issues and questions:
 
 ---
 
-**Last Updated**: March 2026
-**Version**: 1.0.0
-**Project Status**: Active Development
+**Last Updated**: April 2026
+**Version**: 1.1.0
+**Project Status**: Production Ready

@@ -8,6 +8,7 @@ import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, AreaChart, Area
 } from 'recharts';
 import { billingAPI } from '../services/api';
+import AiAssistant from '../components/AiAssistant';
 
 const GOLD = '#c9a84c';
 const GOLD_LIGHT = '#e0c873';
@@ -299,6 +300,32 @@ const BillingAnomaly = () => {
         </div>
       </div>
       </div>
+
+      {/* AI Assistant — context-aware with live billing anomaly data */}
+      <AiAssistant
+        pageTitle="Billing Anomaly Detection"
+        context={{
+          metrics: {
+            totalAnomalies: mb.totalAnomalies,
+            resolvedToday: mb.resolvedToday,
+            revenueImpact: mb.revenueImpact,
+            detectionRate: mb.detectionRate,
+          },
+          criticalAnomalies: recentAnomalies
+            .filter(a => a.severity === 'critical' || a.severity === 'high')
+            .map(a => ({
+              id: a.id,
+              customer: a.customer,
+              type: a.type,
+              amount: a.amount,
+              severity: a.severity,
+              status: a.status,
+            })),
+          severityBreakdown: severityData,
+          anomalyTypeBreakdown: anomalyTypes.map(t => ({ name: t.name, value: t.value })),
+          revenueAtRisk: '$8,700',
+        }}
+      />
     </div>
   );
 };

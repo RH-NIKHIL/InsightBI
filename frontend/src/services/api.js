@@ -114,3 +114,13 @@ export const paymentAPI = {
     request('/payment/verify', { method: 'POST', body: JSON.stringify(data) }),
 };
 
+// ── AI Assistant API (Gemini — called directly from AiAssistant component) ──
+// The actual streaming logic is in src/components/AiAssistant.js
+// This export is for reference and future server-side proxying.
+export const aiAPI = {
+  // Key is read from process.env.REACT_APP_GEMINI_API_KEY
+  getModel: () => 'gemini-1.5-flash',
+  getEndpoint: () =>
+    'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent',
+};
+

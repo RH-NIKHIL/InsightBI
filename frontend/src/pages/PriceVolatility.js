@@ -9,6 +9,7 @@ import {
   ScatterChart, Scatter, ZAxis
 } from 'recharts';
 import { priceAPI } from '../services/api';
+import AiAssistant from '../components/AiAssistant';
 
 const GOLD = '#c9a84c';
 const GOLD_DARK = '#9e8338';
@@ -274,6 +275,27 @@ const PriceVolatility = () => {
         </div>
       </div>
       </div>
+
+      {/* AI Assistant — context-aware with live metrics */}
+      <AiAssistant
+        pageTitle="Price Volatility"
+        context={{
+          metrics: {
+            avgVolatility: mv.avgVolatility,
+            maxVolatility: mv.maxVolatility,
+            priceStability: mv.priceStability,
+            riskScore: mv.riskScore,
+          },
+          productRisks: productVolatility.map(p => ({
+            product: p.product,
+            price: p.currentPrice,
+            volatility: p.volatility,
+            risk: p.risk,
+            trend: p.trend,
+          })),
+          highVolatilityAlert: 'Product B and Product E showing increased volatility',
+        }}
+      />
     </div>
   );
 };

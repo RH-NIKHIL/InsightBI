@@ -8,6 +8,7 @@ import {
   LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ComposedChart
 } from 'recharts';
 import { demandAPI } from '../services/api';
+import AiAssistant from '../components/AiAssistant';
 
 const GOLD = '#c9a84c';
 const GOLD_LIGHT = '#e0c873';
@@ -271,6 +272,29 @@ const DemandForecast = () => {
         </div>
       </div>
       </div>
+
+      {/* AI Assistant — context-aware with live demand forecast data */}
+      <AiAssistant
+        pageTitle="Demand Forecast"
+        context={{
+          metrics: {
+            forecastAccuracy: m.forecastAccuracy,
+            mae: m.mae,
+            rmse: m.rmse,
+            totalForecast: m.totalForecast,
+          },
+          categoryBreakdown: categoryDemand.map(c => ({
+            category: c.category,
+            currentDemand: c.current,
+            forecastedDemand: c.forecast,
+            changePercent: c.change,
+          })),
+          selectedTimeRange: timeRange,
+          nextMonthsForecast: demandData
+            .filter(d => d.actual === null)
+            .map(d => ({ month: d.month, predicted: d.predicted })),
+        }}
+      />
     </div>
   );
 };
